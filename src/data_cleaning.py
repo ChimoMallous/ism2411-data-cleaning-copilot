@@ -4,44 +4,35 @@ This script loads messy sales data, applies cleaning transformations,
 and outputs a clean CSV file ready for analysis.
 """
 
-
 import pandas as pd
 
 
-# Step 1: Load the raw data
-# Purpose: Read the CSV file containing messy sales records
-# Why: We need to load the data before we can clean it
-# This file has inconsistent data formatting, missing values, and invalid entries
-def load_data(file_path: str):
+def load_data(file_path: str) -> pd.DataFrame:
     """Load data from a CSV file and return as DataFrame"""
+    return pd.read_csv(file_path)
 
 
-# Step 2: Standardize column names
-# Purpose: Convert all column names to lowercase with underscores
-# Why: Inconsistent column names (ex. "Product Name" vs "product_name")
-# -cause errors when referencing columns. Standardizing prevents this.
-def clean_column_names(df):
+def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
     """Standardize column names to lowercase with underscores"""
+    df = df.copy()
+    df.columns = df.columns.str.lower().str.replace(' ', '_')
+    return df
 
 
-# Step 3: Handle missing values
-# Purpose: Fill or remove rows with missing prices or quantities
-# Why: Missing values in critical fields like price or quantity can skew analysis
-# We will drop these rows to ensure all remaining data is useable.
-def handle_missing_values(df):
+def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     """Handle missing values in price and quantity columns"""
+    return df.copy().dropna(subset=['price', 'quantity'])
 
 
-# Step 4: Remove invalid rows
-# Purpose: Remove rows with negative prices or quantities
-# Why: Negative values for price or quantity are invalid in sales data
-def remove_invalid_rows(df):
+def remove_invalid_rows(df: pd.DataFrame) -> pd.DataFrame:
     """Remove rows with invalid negative prices or quantities"""
+    df = df.copy()
+    return df[(df['price'] >= 0) & (df['quantity'] >= 0)]
 
 
-# Step 5: Strip whitespace from text columns
-# Purpose: Remove leading/trailing whitespace from text fields
-# Why: "Laptop" and "laptop" should be treated as the same product.
-# Whitespace causes duplicate categories and incorrect grouping.
-def strip_whitespace(df):
+def strip_whitespace(df: pd.DataFrame) -> pd.DataFrame:
     """Strip leading/trailing whitespace from text columns"""
+    df = df.copy()
+    string_cols = df.select_dtypes(include=['object']).columns
+    df[string_cols] = df[string_cols].apply(lambda col: col.str.strip())
+    return df
