@@ -28,13 +28,18 @@ def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
 
 def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     """Handle missing values in price and quantity columns"""
-    return df.copy().dropna(subset=['price', 'quantity'])
+    # MODIFIED: Added print statement to track how many rows were dropped
+    df = df.copy()
+    rows_before = len(df)
+    df = df.dropna(subset=['price', 'qty'])
+    print(f"Dropped {rows_before - len(df)} rows due to missing values.")
+    return df
 
 
 def remove_invalid_rows(df: pd.DataFrame) -> pd.DataFrame:
     """Remove rows with invalid negative prices or quantities"""
     df = df.copy()
-    return df[(df['price'] >= 0) & (df['quantity'] >= 0)]
+    return df[(df['price'] >= 0) & (df['qty'] >= 0)]
 
 
 def strip_whitespace(df: pd.DataFrame) -> pd.DataFrame:
