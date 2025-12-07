@@ -9,7 +9,14 @@ import pandas as pd
 
 def load_data(file_path: str) -> pd.DataFrame:
     """Load data from a CSV file and return as DataFrame"""
-    return pd.read_csv(file_path)
+    # MODIFIED: Added error handling that Copilot didn't include
+    try:
+        df = pd.read_csv(file_path)
+        return df
+    except FileNotFoundError:
+        print(f"Error: File not found at {file_path}")
+        raise
+
 
 
 def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
