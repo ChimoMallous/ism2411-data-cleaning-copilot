@@ -21,8 +21,16 @@ def load_data(file_path: str) -> pd.DataFrame:
 
 def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
     """Standardize column names to lowercase with underscores"""
-    df = df.copy()
+    # MODIFIED: Added stripping of leading/trailing spaces before converting to lowercase
+    df.columns = df.columns.str.strip()
     df.columns = df.columns.str.lower().str.replace(' ', '_')
+    return df
+
+# MODIFIED: Added function to convert price and qty to numeric types
+def convert_to_numeric(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+    df['price'] = pd.to_numeric(df['price'], errors='coerce')
+    df['qty'] = pd.to_numeric(df['qty'], errors='coerce')
     return df
 
 
@@ -55,7 +63,12 @@ if __name__ == "__main__":
     cleaned_path = "data/processed/sales_data_clean.csv"
 
     df_raw = load_data(raw_path)
+    print("RAW COLUMNS:", df_raw.columns.tolist())   
+    print(df_raw.head()) 
+
     df_clean = clean_column_names(df_raw)
+    df_clean = strip_whitespace(df_clean)
+    df_clean = convert_to_numeric(df_clean)   
     df_clean = handle_missing_values(df_clean)
     df_clean = remove_invalid_rows(df_clean)
     df_clean.to_csv(cleaned_path, index=False)
