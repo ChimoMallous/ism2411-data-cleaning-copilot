@@ -21,9 +21,15 @@ def load_data(file_path: str) -> pd.DataFrame:
 
 def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
     """Standardize column names to lowercase with underscores"""
-    # MODIFIED: Added stripping of leading/trailing spaces before converting to lowercase
+    # MODIFIED: Add strip leading/trailing spaces before converting to lowercase, Add lowercase formating for 'prodname' and 'category' columns
+    df = df.copy()
     df.columns = df.columns.str.strip()
     df.columns = df.columns.str.lower().str.replace(' ', '_')
+    if 'prodname' in df.columns:
+        df['prodname'] = df['prodname'].str.lower()
+    if 'category' in df.columns:
+        df['category'] = df['category'].str.lower()
+
     return df
 
 # MODIFIED: Added function to convert price and qty to numeric types
@@ -47,14 +53,21 @@ def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
 def remove_invalid_rows(df: pd.DataFrame) -> pd.DataFrame:
     """Remove rows with invalid negative prices or quantities"""
     df = df.copy()
-    return df[(df['price'] >= 0) & (df['qty'] >= 0)]
-
+    # MODIFIED: Instead of removing rows with negative values as GitHub Copilot suggested,
+    # -we now replace those values with their absolute value
+    df['price'] = df['price'].abs()
+    df['qty'] = df['qty'].abs()
+    return df
 
 def strip_whitespace(df: pd.DataFrame) -> pd.DataFrame:
     """Strip leading/trailing whitespace from text columns"""
     df = df.copy()
     string_cols = df.select_dtypes(include=['object']).columns
     df[string_cols] = df[string_cols].apply(lambda col: col.str.strip())
+
+    # MODIFIED: Add strip leading and trailing whitespace from columns, remove quotation marks
+    df['prodname'] = df['prodname'].str.replace('"', '').str.strip()
+    df['category'] = df['category'].str.replace('"', '').str.strip()
     return df
 
 
